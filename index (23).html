@@ -1,0 +1,687 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>India Auto Sales — October 2026</title>
+<meta name="description" content="Interactive analysis of India's October 2026 auto sales: passenger vehicles, two-wheelers, commercial vehicles, tractors and EVs.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+:root{
+  --font-anthropic-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-anthropic-serif: Georgia, "Times New Roman", serif;
+  --color-fg:#1d1d1b; --color-fg-muted:#6b6a64; --color-bg:#f6f5f1; --color-panel:#ffffff; --color-border-line:#e4e2da;
+  --color-ok:#1f7a4d; --color-warn:#a86400; --color-bad:#c0392b;
+  --cds-radius:8px; --cds-pad-xs:4px; --cds-pad-sm:8px; --cds-pad-md:12px; --cds-pad-lg:18px; --cds-pad-xl:28px;
+  --cds-gap-xs:4px; --cds-gap-sm:8px; --cds-gap-md:14px; --cds-gap-lg:20px; --cds-gap-xl:36px;
+  --cds-font-size-caption:12.5px; --cds-font-size-body:15px; --cds-font-size-heading:17px; --cds-font-size-title:30px;
+  --cds-font-weight-medium:600;
+  --cds-chart-muted:#c9c6bc; --cds-chart-status-critical:#d0503f; --cds-chart-grid:#ecebe5; --cds-chart-axis:#8f8d85; --cds-chart-reference:#9a988f;
+  --cds-surface-popover:#ffffff; --cds-border:#dddbd2; --cds-shadow-popover:0 6px 20px rgba(0,0,0,.12); --cds-text-secondary:#6b6a64;
+  --cds-dur-slow:300ms; --cds-ease-out:cubic-bezier(.2,.7,.2,1);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --color-fg:#ecebe6; --color-fg-muted:#a3a198; --color-bg:#151514; --color-panel:#1f1f1d; --color-border-line:#33322e;
+    --color-ok:#5ac48c; --color-warn:#e0a54a; --color-bad:#ef7a6b;
+    --cds-chart-muted:#4f4d47; --cds-chart-status-critical:#e8705f; --cds-chart-grid:#2c2b28; --cds-chart-axis:#77756d; --cds-chart-reference:#8a887f;
+    --cds-surface-popover:#262624; --cds-border:#3b3a35; --cds-shadow-popover:0 6px 20px rgba(0,0,0,.5); --cds-text-secondary:#a3a198;
+  }
+}
+html,body{margin:0;background:var(--color-bg);color:var(--color-fg);}
+#dash-root{max-width:1180px;margin:0 auto;padding:clamp(16px,4vw,40px);box-sizing:border-box;}
+.ax-foot{margin-top:var(--cds-gap-xl);font-family:var(--font-anthropic-sans);font-size:var(--cds-font-size-caption);color:var(--color-fg-muted);border-top:1px solid var(--color-border-line);padding-top:var(--cds-pad-lg);line-height:1.6;}
+.ax-foot a{color:inherit;}
+</style>
+</head>
+<body>
+<div id="dash-root">
+<script>
+window.dash = (() => {
+  const raw = {"pv_oems": [{"maker": "Maruti Suzuki", "oct26": 212384, "sep26": 168744, "oct25": 176318, "basis": "Dispatch"}, {"maker": "Tata Motors", "oct26": 73894, "sep26": 56972, "oct25": 61134, "basis": "Dispatch"}, {"maker": "Mahindra", "oct26": 73338, "sep26": 56745, "oct25": 71624, "basis": "Dispatch"}, {"maker": "Hyundai", "oct26": 62799, "sep26": 49998, "oct25": 53792, "basis": "Dispatch"}, {"maker": "Kia", "oct26": 33462, "sep26": 32017, "oct25": 29556, "basis": "Dispatch"}, {"maker": "Toyota", "oct26": 29521, "sep26": 27652, "oct25": 40257, "basis": "Dispatch"}, {"maker": "Skoda-VW", "oct26": 9083, "sep26": 8468, "oct25": 8252, "basis": "Registration"}, {"maker": "JSW MG", "oct26": 7014, "sep26": 5226, "oct25": 6397, "basis": "Registration"}, {"maker": "Honda", "oct26": 5429, "sep26": 6955, "oct25": 6394, "basis": "Registration"}, {"maker": "Renault", "oct26": 4577, "sep26": 3399, "oct25": 5041, "basis": "Dispatch"}, {"maker": "Nissan", "oct26": 3600, "sep26": 2960, "oct25": 2402, "basis": "Registration"}], "tw_oems": [{"brand": "Hero", "oct26": 705084, "sep26": 710436, "oct25": 604829, "exports": 29319}, {"brand": "Honda", "oct26": 664831, "sep26": 636768, "oct25": 598952, "exports": 69735}, {"brand": "TVS", "oct26": 514764, "sep26": 482073, "oct25": 421631, "exports": 155915}, {"brand": "Bajaj", "oct26": 292885, "sep26": 239771, "oct25": 266470, "exports": 208309}, {"brand": "Suzuki", "oct26": 124599, "sep26": 108806, "oct25": 103454, "exports": 21720}, {"brand": "Royal Enfield", "oct26": 121527, "sep26": 121326, "oct25": 116844, "exports": 11915}], "pv_trend": [{"month": "2026-07-01", "maker": "Maruti Suzuki", "units": 196203}, {"month": "2026-08-01", "maker": "Maruti Suzuki", "units": 176971}, {"month": "2026-09-01", "maker": "Maruti Suzuki", "units": 168744}, {"month": "2026-10-01", "maker": "Maruti Suzuki", "units": 212384}, {"month": "2026-07-01", "maker": "Tata Motors", "units": 62611}, {"month": "2026-08-01", "maker": "Tata Motors", "units": 65253}, {"month": "2026-09-01", "maker": "Tata Motors", "units": 56972}, {"month": "2026-10-01", "maker": "Tata Motors", "units": 73894}, {"month": "2026-07-01", "maker": "Mahindra", "units": 60048}, {"month": "2026-08-01", "maker": "Mahindra", "units": 59257}, {"month": "2026-09-01", "maker": "Mahindra", "units": 56745}, {"month": "2026-10-01", "maker": "Mahindra", "units": 73338}, {"month": "2026-07-01", "maker": "Hyundai", "units": 54210}, {"month": "2026-08-01", "maker": "Hyundai", "units": 54396}, {"month": "2026-09-01", "maker": "Hyundai", "units": 49998}, {"month": "2026-10-01", "maker": "Hyundai", "units": 62799}], "cv_farm": [{"company": "Tata Motors CV", "segment": "Commercial vehicles", "oct26": 47652, "yoy_pct": 27}, {"company": "Ashok Leyland", "segment": "Commercial vehicles", "oct26": 21888, "yoy_pct": 23}, {"company": "Mahindra CV & 3W", "segment": "Commercial vehicles", "oct26": 50669, "yoy_pct": 14}, {"company": "Escorts Kubota", "segment": "Tractors", "oct26": 16921, "yoy_pct": -10}], "ev": [{"name": "Industry e-2W", "segment": "Two-wheeler", "oct26": 223000, "oct25": null}, {"name": "TVS e-2W", "segment": "Two-wheeler", "oct26": 71382, "oct25": 32387}, {"name": "Tata Motors EV", "segment": "Car", "oct26": 14552, "oct25": null}, {"name": "JSW MG EV", "segment": "Car", "oct26": 5877, "oct25": null}]};
+  const calcs = {}, draws = {};
+  const dark = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
+  const colors = dark ? ['#6ea3ff','#f2994a','#4cc3b0','#b58cf0','#f07aa0','#e3c04f','#8fb8a8','#d9a07a']
+                      : ['#2563c9','#d9722e','#1f9a87','#7d4fc4','#c94673','#b8931c','#5b8c79','#a8673c'];
+  const api = {
+    colors,
+    data(id) {
+      if (raw[id]) return { status: 'ok', data: raw[id] };
+      const c = calcs[id];
+      if (c) { if (!c.v) c.v = c.fn(...c.inputs.map((i) => api.data(i).data)); return { status: 'ok', data: c.v }; }
+      return { status: 'missing', data: [] };
+    },
+    calc(id, o) { calcs[id] = o; },
+    draw(name, fn) {
+      if (fn) { draws[name] = fn; return; }
+      if (draws[name]) document.querySelectorAll(`[data-draw="${name}"]`).forEach((el) => draws[name](el));
+    },
+    _all() { Object.keys(draws).forEach((n) => api.draw(n)); }
+  };
+  return api;
+})();
+</script>
+<style>
+  .ax { font-family: var(--font-anthropic-sans); color: var(--color-fg); font-variant-numeric: tabular-nums; }
+  .ax-head h1 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0 0 var(--cds-gap-xs); }
+  .ax-head p { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-body); max-width: 60rem; line-height: 1.5; }
+  .ax .ax-head p b, .ax .ax-note b { color: var(--color-fg); font-weight: 600; }
+  .ax-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: var(--cds-gap-md); margin: var(--cds-gap-lg) 0; }
+  .ax-kpi { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-md) var(--cds-pad-lg); }
+  .ax-kpi .ax-k { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .ax .ax-kpi .ax-big { display: block; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: var(--cds-gap-xs) 0; }
+  .ax-kpi .ax-d { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .ax .ax-up { color: var(--color-ok); }
+  .ax .ax-down { color: var(--color-bad); }
+  .ax h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: var(--cds-gap-xl) 0 var(--cds-gap-md); }
+  .ax-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: var(--cds-gap-md); }
+  .ax-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); min-width: 0; }
+  .ax-wide { grid-column: 1 / -1; }
+  .ax-card h3 { margin: 0; font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); }
+  .ax-card .ax-note { margin: var(--cds-gap-xs) 0 var(--cds-gap-md); color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); line-height: 1.45; }
+  .ax-cardtop { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--cds-gap-sm); flex-wrap: wrap; }
+  .ax-legend { display: flex; gap: var(--cds-gap-md); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-bottom: var(--cds-gap-sm); flex-wrap: wrap; }
+  .ax-legend span { display: inline-flex; align-items: center; gap: var(--cds-gap-xs); }
+  .ax-sw { display: inline-block; width: 0.625rem; height: 0.625rem; border-radius: 2px; background: var(--cds-chart-muted); }
+  .ax-chart { position: relative; min-height: 260px; }
+  .ax-svg { display: block; overflow: visible; }
+  .ax-svg text { font-family: var(--font-anthropic-sans); font-size: var(--cds-font-size-caption); fill: var(--color-fg-muted); }
+  .ax-svg text.ax-lab { fill: var(--color-fg); }
+  .ax-svg text.ax-val { fill: var(--color-fg); font-weight: 600; }
+  .ax-svg text.ax-center { font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-title); fill: var(--color-fg); }
+  .ax-svg .ax-gridline { stroke: var(--cds-chart-grid); stroke-width: 1; }
+  .ax-svg .ax-ref { stroke: var(--cds-chart-reference); stroke-width: 1; stroke-dasharray: 4 3; }
+  .ax-svg .ax-axis { stroke: var(--cds-chart-axis); stroke-width: 1; }
+  .ax-tip { position: absolute; z-index: 5; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); pointer-events: none; min-width: 9rem; }
+  .ax-tip .ax-tip-h { color: var(--cds-text-secondary); margin-bottom: 2px; }
+  .ax-tip .ax-tip-r { display: flex; align-items: center; gap: var(--cds-gap-xs); }
+  .ax-tip .ax-tip-r b { margin-left: auto; padding-left: var(--cds-gap-sm); font-weight: 600; }
+  .ax-fail { display: flex; align-items: center; justify-content: center; gap: var(--cds-gap-xs); min-height: inherit; height: 100%; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .ax-dot { width: 0.375rem; height: 0.375rem; border-radius: 50%; background: var(--color-bad); }
+  .ax-seg { display: inline-flex; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); overflow: hidden; }
+  .ax-seg button { font: inherit; font-size: var(--cds-font-size-caption); background: transparent; color: var(--color-fg-muted); border: 0; padding: var(--cds-pad-xs) var(--cds-pad-sm); cursor: pointer; }
+  .ax-seg button[aria-pressed="true"] { background: var(--color-bg); color: var(--color-fg); font-weight: 600; }
+  .ax-search { font: inherit; font-size: var(--cds-font-size-caption); padding: var(--cds-pad-xs) var(--cds-pad-sm); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-bg); color: var(--color-fg); min-width: 12rem; }
+  .ax-tablewrap { max-height: 28rem; overflow: auto; }
+  .ax-table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); }
+  .ax-table th { position: sticky; top: 0; background: var(--color-panel); text-align: left; border-bottom: 1px solid var(--color-border-line); padding: 0; white-space: nowrap; }
+  .ax-table th.n, .ax-table td.n { text-align: right; }
+  .ax-table th button { font: inherit; font-weight: 600; color: var(--color-fg); background: none; border: 0; padding: var(--cds-pad-xs) var(--cds-pad-sm); cursor: pointer; width: 100%; text-align: inherit; }
+  .ax-table td { padding: var(--cds-pad-xs) var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); white-space: nowrap; }
+  .ax-table tr:hover td { background: var(--color-bg); }
+  .ax-notes { margin-top: var(--cds-gap-xl); font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .ax-notes summary { cursor: pointer; color: var(--color-fg); }
+  .ax-notes dt { color: var(--color-fg); font-weight: 600; margin-top: var(--cds-gap-sm); }
+  .ax-notes dd { margin: 0; line-height: 1.45; }
+  [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+  @media (max-width: 560px) { .ax-hide-sm { display: none; } }
+</style>
+
+<div class="ax">
+  <header class="ax-head">
+    <h1>India auto sales — October 2026</h1>
+    <p>Festive demand lifted October: passenger vehicles rose <b data-draw="val" data-source="pv_total" data-field="yoy" data-fmt="pct">—</b> and domestic two-wheelers <b data-draw="val" data-source="tw_total" data-field="yoy" data-fmt="pct">—</b> from a year earlier. Commercial vehicles grew strongly; tractors were the one segment in decline.</p>
+  </header>
+
+  <section class="ax-kpis" aria-label="Headline figures">
+    <div class="ax-kpi">
+      <div class="ax-k">Passenger vehicles · 11 carmakers</div>
+      <span class="ax-big" data-draw="val" data-source="pv_total" data-field="oct26">—</span>
+      <div class="ax-d"><span data-draw="val" data-source="pv_total" data-field="yoy" data-fmt="pct">—</span> vs Oct 2025</div>
+    </div>
+    <div class="ax-kpi">
+      <div class="ax-k">Two-wheelers, domestic · top 6</div>
+      <span class="ax-big" data-draw="val" data-source="tw_total" data-field="oct26">—</span>
+      <div class="ax-d"><span data-draw="val" data-source="tw_total" data-field="yoy" data-fmt="pct">—</span> vs Oct 2025</div>
+    </div>
+    <div class="ax-kpi">
+      <div class="ax-k">Two-wheeler exports · top 6</div>
+      <span class="ax-big" data-draw="val" data-source="tw_total" data-field="exports">—</span>
+      <div class="ax-d">Units shipped abroad in October</div>
+    </div>
+    <div class="ax-kpi">
+      <div class="ax-k">Maruti Suzuki share of PVs</div>
+      <span class="ax-big" data-draw="val" data-source="pv_growth" data-where="maker=Maruti%20Suzuki" data-field="share" data-fmt="share">—</span>
+      <div class="ax-d">Of the 11 carmakers' total</div>
+    </div>
+    <div class="ax-kpi">
+      <div class="ax-k">Electric two-wheelers · industry</div>
+      <span class="ax-big" data-draw="val" data-source="ev" data-where="name=Industry%20e-2W" data-field="oct26">—</span>
+      <div class="ax-d">A monthly record (approx.)</div>
+    </div>
+  </section>
+
+  <h2 id="passenger">Passenger vehicles</h2>
+  <div class="ax-grid">
+    <div class="ax-card ax-wide">
+      <h3>Carmaker sales, October 2026 vs October 2025</h3>
+      <p class="ax-note">Domestic units. Toyota and Honda were the only large makers below last October; Tata edged Mahindra for second.</p>
+      <div class="ax-legend"><span><i class="ax-sw" data-sw="0"></i>Oct 2026</span><span><i class="ax-sw"></i>Oct 2025</span></div>
+      <div class="ax-chart" data-draw="pv_bars" data-source="pv_oems"></div>
+    </div>
+    <div class="ax-card">
+      <h3>Market share</h3>
+      <p class="ax-note">Share of the 11 carmakers' October total; the smallest five are grouped.</p>
+      <div class="ax-chart" data-draw="pv_donut" data-source="pv_growth"></div>
+    </div>
+    <div class="ax-card">
+      <h3>Growth matrix</h3>
+      <p class="ax-note">Change vs September (across) against change vs last October (up). Bubble size is October volume. Top right is growing on both counts.</p>
+      <div class="ax-chart" data-draw="pv_scatter" data-source="pv_growth"></div>
+    </div>
+    <div class="ax-card ax-wide">
+      <h3>Top four carmakers, July–October 2026</h3>
+      <p class="ax-note">Monthly domestic units. Every one of the four dipped in September and jumped in festive October.</p>
+      <div class="ax-chart" data-draw="pv_trend" data-source="pv_trend"></div>
+    </div>
+  </div>
+
+  <h2 id="two-wheelers">Two-wheelers</h2>
+  <div class="ax-grid">
+    <div class="ax-card">
+      <h3>Domestic sales and exports</h3>
+      <p class="ax-note">Bajaj ships nearly as many bikes abroad as it sells at home; TVS is the second-largest exporter.</p>
+      <div class="ax-legend"><span><i class="ax-sw" data-sw="0"></i>Domestic</span><span><i class="ax-sw" data-sw="1"></i>Exports</span></div>
+      <div class="ax-chart" data-draw="tw_stack" data-source="tw_oems"></div>
+    </div>
+    <div class="ax-card">
+      <div class="ax-cardtop">
+        <h3>Growth by brand</h3>
+        <div class="ax-seg" role="group" aria-label="Compare with">
+          <button type="button" data-mode="yoy" aria-pressed="true">vs Oct 2025</button>
+          <button type="button" data-mode="mom" aria-pressed="false">vs Sep 2026</button>
+        </div>
+      </div>
+      <p class="ax-note">Domestic units. TVS and Suzuki grew fastest over the year; Bajaj jumped most over the month.</p>
+      <div class="ax-chart" data-draw="tw_growth" data-source="tw_growth"></div>
+    </div>
+  </div>
+
+  <h2 id="cv-ev">Commercial vehicles, tractors and EVs</h2>
+  <div class="ax-grid">
+    <div class="ax-card">
+      <h3>Year-on-year change, October 2026</h3>
+      <p class="ax-note">Total sales including exports. Tractors fell as the festive calendar shifted.</p>
+      <div class="ax-chart" data-draw="cv_growth" data-source="cv_farm"></div>
+    </div>
+    <div class="ax-card">
+      <h3>Electric vehicles, October 2026</h3>
+      <p class="ax-note">TVS electric two-wheelers rose <b data-draw="val" data-source="ev_tvs" data-field="yoy" data-fmt="pct">—</b> from last October. The industry figure is rounded.</p>
+      <div class="ax-chart" data-draw="ev_bars" data-source="ev"></div>
+    </div>
+  </div>
+
+  <h2 id="table">All carmakers</h2>
+  <div class="ax-card">
+    <div class="ax-cardtop">
+      <p class="ax-note">Click a column to sort. Basis shows whether a figure is a company dispatch or a VAHAN registration count.</p>
+      <input class="ax-search" type="search" placeholder="Search carmaker" aria-label="Search carmaker">
+    </div>
+    <div class="ax-tablewrap">
+      <table class="ax-table" data-source="pv_growth" data-row-key="maker">
+        <thead><tr>
+          <th data-field="maker"><button type="button" data-key="maker">Carmaker</button></th>
+          <th data-field="basis" class="ax-hide-sm"><button type="button" data-key="basis">Basis</button></th>
+          <th data-field="oct26" class="n"><button type="button" data-key="oct26">Oct 2026</button></th>
+          <th data-field="sep26" class="n ax-hide-sm"><button type="button" data-key="sep26">Sep 2026</button></th>
+          <th data-field="oct25" class="n ax-hide-sm"><button type="button" data-key="oct25">Oct 2025</button></th>
+          <th data-field="mom" class="n"><button type="button" data-key="mom">MoM</button></th>
+          <th data-field="yoy" class="n"><button type="button" data-key="yoy">YoY</button></th>
+          <th data-field="share" class="n"><button type="button" data-key="share">Share</button></th>
+        </tr></thead>
+        <tbody data-draw="pv_table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <details class="ax-notes">
+    <summary>Definitions, sources and what's left out</summary>
+    <dl>
+      <dt>Dispatch vs registration</dt>
+      <dd>Most carmakers report wholesale dispatches to dealers. Skoda-VW, JSW MG, Honda and Nissan figures are VAHAN registrations, so they are not strictly comparable with the rest.</dd>
+      <dt>YoY and MoM</dt>
+      <dd>YoY compares October 2026 with October 2025; MoM compares it with September 2026.</dd>
+      <dt>Totals</dt>
+      <dd>The passenger vehicle total sums the 11 carmakers listed; the two-wheeler total sums the six largest makers. Neither is the official industry total, which SIAM publishes mid-month.</dd>
+      <dt>Left out</dt>
+      <dd>VECV (Eicher) reported growth of 34.9% but no unit figure here. Mahindra's tractor sales fell by double digits without a published unit figure in our sources. Retail (FADA) data is not included.</dd>
+      <dt>Sources</dt>
+      <dd>Autocar India, company stock-exchange filings as reported by Asianet, Investywise, CMV360 and BikeJunction, published 1–4 November 2026.</dd>
+    </dl>
+  </details>
+</div>
+
+<script>
+window.AXstate = window.AXstate || { twMode: 'yoy', sort: { key: 'oct26', dir: -1 }, q: '' };
+window.AX = (() => {
+  const inr = new Intl.NumberFormat('en-IN');
+  const num = (v) => inr.format(Math.round(v));
+  const pct = (v) => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v * 100).toFixed(1) + '%';
+  const share = (v) => (v * 100).toFixed(1) + '%';
+  const compact = (v) => v >= 1e5 ? +(v / 1e5).toFixed(2) + 'L' : v >= 1e3 ? +(v / 1e3).toFixed(1) + 'K' : String(v);
+  const color = (i) => dash.colors[i % dash.colors.length];
+
+  function status(el, ids) {
+    for (const id of ids) {
+      const d = dash.data(id);
+      if (d.status !== 'ok') {
+        el.replaceChildren();
+        el.classList.toggle('dash-skeleton', d.status === 'loading');
+        if (d.status === 'error' || d.status === 'connect' || d.status === 'missing' || d.status === 'declined') {
+          const f = document.createElement('div'); f.className = 'ax-fail';
+          const dot = document.createElement('span'); dot.className = 'ax-dot';
+          const s = document.createElement('span'); s.textContent = 'Failed to load';
+          f.append(dot, s); el.appendChild(f);
+        }
+        return null;
+      }
+    }
+    el.classList.remove('dash-skeleton');
+    return ids.map((id) => (Array.isArray(dash.data(id).data) ? dash.data(id).data : []));
+  }
+  function svg(el, w, h) {
+    el.replaceChildren();
+    el.style.minHeight = h + 'px';
+    return d3.select(el).append('svg').attr('class', 'ax-svg').attr('width', '100%').attr('height', h).attr('viewBox', `0 0 ${w} ${h}`);
+  }
+  function measure(s, strs, cls) {
+    const g = s.append('g').style('visibility', 'hidden');
+    let m = 0;
+    strs.forEach((t) => { const n = g.append('text').attr('class', cls || null).text(t).node(); m = Math.max(m, n.getComputedTextLength()); });
+    g.remove();
+    return m;
+  }
+  function tipEl(el) {
+    let t = el.querySelector(':scope > .ax-tip');
+    if (!t) { t = document.createElement('div'); t.className = 'ax-tip'; t.hidden = true; el.appendChild(t); }
+    return t;
+  }
+  function show(el, ev, title, lines) {
+    const t = tipEl(el);
+    t.replaceChildren();
+    const h = document.createElement('div'); h.className = 'ax-tip-h'; h.textContent = title; t.appendChild(h);
+    lines.forEach(([c, name, val]) => {
+      const r = document.createElement('div'); r.className = 'ax-tip-r';
+      if (c) { const s = document.createElement('span'); s.className = 'ax-sw'; s.style.background = c; r.appendChild(s); }
+      const n = document.createElement('span'); n.textContent = name;
+      const v = document.createElement('b'); v.textContent = val;
+      r.append(n, v); t.appendChild(r);
+    });
+    t.hidden = false;
+    const b = el.getBoundingClientRect();
+    const tw = t.offsetWidth, th = t.offsetHeight;
+    let x = ev.clientX - b.left + 14, y = ev.clientY - b.top + 14;
+    if (x + tw > b.width) x = ev.clientX - b.left - tw - 14;
+    if (x < 0) x = 0;
+    if (y + th > b.height) y = Math.max(0, ev.clientY - b.top - th - 14);
+    t.style.left = x + 'px'; t.style.top = y + 'px';
+  }
+  function hide(el) { const t = el.querySelector(':scope > .ax-tip'); if (t) t.hidden = true; }
+
+  // Horizontal diverging bars around zero.
+  function diverge(el, rows, opt) {
+    const W = el.clientWidth || 480, rowH = 34, H = rows.length * rowH + 30;
+    const s = svg(el, W, H);
+    const vals = rows.map(opt.value);
+    const lw = measure(s, rows.map(opt.name), 'ax-lab') + 12;
+    const vw = measure(s, vals.map(opt.fmt), 'ax-val') + 10;
+    const lo = Math.min(0, d3.min(vals)), hi = Math.max(0, d3.max(vals));
+    const x = d3.scaleLinear([lo, hi], [lw + (lo < 0 ? vw : 0), W - vw]).nice();
+    const y = d3.scaleBand(rows.map(opt.name), [4, H - 26]).paddingInner(0.3);
+    const ticks = x.ticks(Math.max(2, Math.floor((W - lw) / 90)));
+    s.append('g').selectAll('line').data(ticks).join('line').attr('class', 'ax-gridline').attr('x1', x).attr('x2', x).attr('y1', 0).attr('y2', H - 26);
+    s.append('g').selectAll('text').data(ticks).join('text').attr('x', x).attr('y', H - 8).attr('text-anchor', 'middle').text(d3.format('+.0%'));
+    s.append('line').attr('class', 'ax-axis').attr('x1', x(0)).attr('x2', x(0)).attr('y1', 0).attr('y2', H - 26);
+    const g = s.append('g').selectAll('g').data(rows).join('g').attr('transform', (r) => `translate(0,${y(opt.name(r))})`);
+    g.append('text').attr('class', 'ax-lab').attr('x', lw - 12).attr('y', y.bandwidth() / 2).attr('dy', '0.32em').attr('text-anchor', 'end').text(opt.name);
+    g.append('rect').attr('rx', 3).attr('height', y.bandwidth())
+      .attr('x', (r) => Math.min(x(0), x(opt.value(r)))).attr('width', (r) => Math.max(1, Math.abs(x(opt.value(r)) - x(0))))
+      .style('fill', (r) => (opt.value(r) < 0 ? 'var(--cds-chart-status-critical)' : color(0)));
+    g.append('text').attr('class', 'ax-val').attr('y', y.bandwidth() / 2).attr('dy', '0.32em')
+      .attr('x', (r) => (opt.value(r) < 0 ? x(opt.value(r)) - 6 : x(opt.value(r)) + 6))
+      .attr('text-anchor', (r) => (opt.value(r) < 0 ? 'end' : 'start')).text((r) => opt.fmt(opt.value(r)));
+    g.append('rect').attr('x', 0).attr('width', W).attr('y', -y.step() * 0.15).attr('height', y.step()).style('fill', 'transparent')
+      .on('mousemove', (ev, r) => show(el, ev, opt.name(r), opt.tip(r))).on('mouseleave', () => hide(el));
+  }
+
+  // Simple horizontal bars, optionally stacked from several fields.
+  function hbars(el, rows, opt) {
+    const W = el.clientWidth || 480, rowH = 34, H = rows.length * rowH + 30;
+    const s = svg(el, W, H);
+    const total = (r) => d3.sum(opt.fields, (f) => r[f] || 0);
+    const lw = measure(s, rows.map(opt.name), 'ax-lab') + 12;
+    const vw = measure(s, rows.map((r) => num(total(r))), 'ax-val') + 10;
+    const x = d3.scaleLinear([0, d3.max(rows, total)], [lw, W - vw]);
+    const y = d3.scaleBand(rows.map(opt.name), [4, H - 26]).paddingInner(0.3);
+    const ticks = x.ticks(Math.max(2, Math.floor((W - lw) / 90)));
+    s.append('g').selectAll('line').data(ticks).join('line').attr('class', 'ax-gridline').attr('x1', x).attr('x2', x).attr('y1', 0).attr('y2', H - 26);
+    s.append('g').selectAll('text').data(ticks).join('text').attr('x', x).attr('y', H - 8).attr('text-anchor', 'middle').text(compact);
+    const g = s.append('g').selectAll('g').data(rows).join('g').attr('transform', (r) => `translate(0,${y(opt.name(r))})`);
+    g.append('text').attr('class', 'ax-lab').attr('x', lw - 12).attr('y', y.bandwidth() / 2).attr('dy', '0.32em').attr('text-anchor', 'end').text(opt.name);
+    opt.fields.forEach((f, i) => {
+      g.append('rect').attr('height', y.bandwidth()).attr('rx', i === opt.fields.length - 1 ? 3 : 0)
+        .attr('x', (r) => x(d3.sum(opt.fields.slice(0, i), (k) => r[k] || 0)))
+        .attr('width', (r) => Math.max(0, x(r[f] || 0) - lw)).style('fill', color(i));
+    });
+    g.append('text').attr('class', 'ax-val').attr('x', (r) => x(total(r)) + 6).attr('y', y.bandwidth() / 2).attr('dy', '0.32em').text((r) => num(total(r)));
+    g.append('rect').attr('x', 0).attr('width', W).attr('y', -y.step() * 0.15).attr('height', y.step()).style('fill', 'transparent')
+      .on('mousemove', (ev, r) => show(el, ev, opt.name(r), opt.tip(r))).on('mouseleave', () => hide(el));
+  }
+  return { num, pct, share, compact, color, status, svg, measure, show, hide, diverge, hbars };
+})();
+</script>
+
+<script>
+dash.calc('pv_growth', {
+  inputs: ['pv_oems'],
+  title: 'Carmaker growth and share',
+  description: 'Each carmaker’s change vs Sep 2026 and Oct 2025, and its share of the 11 carmakers’ October total.',
+  fn: (pv_oems) => {
+    const total = pv_oems.reduce((a, r) => a + r.oct26, 0);
+    return pv_oems.map((r) => ({ maker: r.maker, basis: r.basis, oct26: r.oct26, sep26: r.sep26, oct25: r.oct25,
+      mom: r.oct26 / r.sep26 - 1, yoy: r.oct26 / r.oct25 - 1, share: r.oct26 / total }));
+  }
+});
+dash.calc('pv_total', {
+  inputs: ['pv_oems'],
+  title: 'Passenger vehicle total',
+  description: 'Sum of the 11 carmakers for each month, with the change vs Sep 2026 and Oct 2025.',
+  fn: (pv_oems) => {
+    const s = (k) => pv_oems.reduce((a, r) => a + r[k], 0);
+    const oct26 = s('oct26'), sep26 = s('sep26'), oct25 = s('oct25');
+    return [{ oct26, sep26, oct25, mom: oct26 / sep26 - 1, yoy: oct26 / oct25 - 1 }];
+  }
+});
+dash.calc('tw_growth', {
+  inputs: ['tw_oems'],
+  title: 'Two-wheeler brand growth',
+  description: 'Each brand’s domestic change vs Sep 2026 and Oct 2025.',
+  fn: (tw_oems) => tw_oems.map((r) => ({ brand: r.brand, oct26: r.oct26, sep26: r.sep26, oct25: r.oct25,
+    mom: r.oct26 / r.sep26 - 1, yoy: r.oct26 / r.oct25 - 1 }))
+});
+dash.calc('tw_total', {
+  inputs: ['tw_oems'],
+  title: 'Two-wheeler total',
+  description: 'Domestic sales and exports summed over the six largest makers.',
+  fn: (tw_oems) => {
+    const s = (k) => tw_oems.reduce((a, r) => a + r[k], 0);
+    const oct26 = s('oct26'), oct25 = s('oct25'), sep26 = s('sep26');
+    return [{ oct26, oct25, sep26, exports: s('exports'), yoy: oct26 / oct25 - 1, mom: oct26 / sep26 - 1 }];
+  }
+});
+dash.calc('ev_tvs', {
+  inputs: ['ev'],
+  title: 'TVS e-2W growth',
+  description: 'TVS electric two-wheeler sales, October 2026 vs October 2025.',
+  fn: (ev) => ev.filter((r) => r.name === 'TVS e-2W' && r.oct25).map((r) => ({ name: r.name, yoy: r.oct26 / r.oct25 - 1 }))
+});
+</script>
+
+<script>
+// Legend swatch colours follow the dashboard's series colours.
+document.querySelectorAll('.ax-sw[data-sw]').forEach((s) => { s.style.background = AX.color(+s.dataset.sw); });
+
+// Single figures in text and tiles.
+dash.draw('val', (el) => {
+  const d = dash.data(el.dataset.source);
+  if (d.status !== 'ok') { el.textContent = '—'; el.classList.toggle('dash-skeleton', d.status === 'loading'); return; }
+  el.classList.remove('dash-skeleton');
+  const rows = Array.isArray(d.data) ? d.data : [];
+  let row = rows[0];
+  if (el.dataset.where) {
+    const [k, v] = el.dataset.where.split('=');
+    row = rows.find((r) => String(r[k]) === decodeURIComponent(v));
+  }
+  const v = row ? row[el.dataset.field] : undefined;
+  if (v == null) { el.textContent = '—'; return; }
+  const f = el.dataset.fmt;
+  el.textContent = f === 'pct' ? AX.pct(v) : f === 'share' ? AX.share(v) : AX.num(v);
+  el.classList.toggle('ax-up', f === 'pct' && v > 0);
+  el.classList.toggle('ax-down', f === 'pct' && v < 0);
+});
+
+// Grouped bars: Oct 2026 vs Oct 2025 per carmaker.
+dash.draw('pv_bars', (el) => {
+  const got = AX.status(el, ['pv_oems']); if (!got) return;
+  const rows = got[0].slice().sort((a, b) => b.oct26 - a.oct26);
+  const W = el.clientWidth || 640, H = rows.length * 34 + 30;
+  const s = AX.svg(el, W, H);
+  const max = d3.max(rows, (r) => Math.max(r.oct26, r.oct25));
+  const lw = AX.measure(s, rows.map((r) => r.maker), 'ax-lab') + 12;
+  const vw = AX.measure(s, [AX.num(max)], 'ax-val') + 10;
+  const x = d3.scaleLinear([0, max], [lw, W - vw]);
+  const y = d3.scaleBand(rows.map((r) => r.maker), [4, H - 26]).paddingInner(0.25);
+  const sub = d3.scaleBand(['oct26', 'oct25'], [0, y.bandwidth()]).padding(0.08);
+  const ticks = x.ticks(Math.max(2, Math.floor((W - lw) / 100)));
+  s.append('g').selectAll('line').data(ticks).join('line').attr('class', 'ax-gridline').attr('x1', x).attr('x2', x).attr('y1', 0).attr('y2', H - 26);
+  s.append('g').selectAll('text').data(ticks).join('text').attr('x', x).attr('y', H - 8).attr('text-anchor', 'middle').text(AX.compact);
+  const g = s.append('g').selectAll('g').data(rows).join('g').attr('transform', (r) => `translate(0,${y(r.maker)})`);
+  g.append('text').attr('class', 'ax-lab').attr('x', lw - 12).attr('y', y.bandwidth() / 2).attr('dy', '0.32em').attr('text-anchor', 'end').text((r) => r.maker);
+  g.append('rect').attr('x', lw).attr('y', sub('oct26')).attr('height', sub.bandwidth()).attr('rx', 2).attr('width', (r) => x(r.oct26) - lw).style('fill', AX.color(0));
+  g.append('rect').attr('x', lw).attr('y', sub('oct25')).attr('height', sub.bandwidth()).attr('rx', 2).attr('width', (r) => x(r.oct25) - lw).style('fill', 'var(--cds-chart-muted)');
+  g.append('text').attr('class', 'ax-val').attr('x', (r) => x(Math.max(r.oct26, r.oct25)) + 6).attr('y', sub('oct26') + sub.bandwidth() / 2).attr('dy', '0.32em').text((r) => AX.num(r.oct26));
+  g.append('rect').attr('x', 0).attr('width', W).attr('y', -y.step() * 0.125).attr('height', y.step()).style('fill', 'transparent')
+    .on('mousemove', (ev, r) => AX.show(el, ev, r.maker, [
+      [AX.color(0), 'Oct 2026', AX.num(r.oct26)],
+      ['var(--cds-chart-muted)', 'Oct 2025', AX.num(r.oct25)],
+      [null, 'Change', AX.pct(r.oct26 / r.oct25 - 1)]
+    ])).on('mouseleave', () => AX.hide(el));
+});
+
+// Donut of market share.
+dash.draw('pv_donut', (el) => {
+  const got = AX.status(el, ['pv_growth']); if (!got) return;
+  const rows = got[0].slice().sort((a, b) => b.oct26 - a.oct26);
+  const parts = rows.slice(0, 6).map((r, i) => ({ name: r.maker, v: r.oct26, share: r.share, c: AX.color(i) }));
+  const rest = rows.slice(6);
+  if (rest.length) parts.push({ name: 'Others', v: d3.sum(rest, (r) => r.oct26), share: d3.sum(rest, (r) => r.share), c: 'var(--cds-chart-muted)' });
+  const total = d3.sum(parts, (p) => p.v);
+  const W = el.clientWidth || 360;
+  const size = Math.min(220, W);
+  const wide = W >= size + 190;
+  const H = wide ? Math.max(size, parts.length * 24) : size + 16 + parts.length * 24;
+  const s = AX.svg(el, W, H);
+  const R = size / 2, cx = wide ? R : W / 2, cy = R;
+  const arc = d3.arc().innerRadius(R * 0.62).outerRadius(R - 2).padAngle(0.012).cornerRadius(2);
+  const pie = d3.pie().sort(null).value((p) => p.v)(parts);
+  const g = s.append('g').attr('transform', `translate(${cx},${cy})`);
+  g.selectAll('path').data(pie).join('path').attr('d', arc).style('fill', (d) => d.data.c)
+    .on('mousemove', (ev, d) => AX.show(el, ev, d.data.name, [[d.data.c, 'Units', AX.num(d.data.v)], [null, 'Share', AX.share(d.data.share)]]))
+    .on('mouseleave', () => AX.hide(el));
+  g.append('text').attr('class', 'ax-center').attr('text-anchor', 'middle').attr('dy', '0.1em').text(AX.compact(total));
+  g.append('text').attr('text-anchor', 'middle').attr('dy', '1.6em').text('units in October');
+  const lx = wide ? size + 24 : 8, ly = wide ? (H - parts.length * 24) / 2 + 12 : size + 28;
+  const lg = s.append('g').selectAll('g').data(parts).join('g').attr('transform', (p, i) => `translate(${lx},${ly + i * 24})`);
+  lg.append('rect').attr('width', 10).attr('height', 10).attr('y', -6).attr('rx', 2).style('fill', (p) => p.c);
+  lg.append('text').attr('class', 'ax-lab').attr('x', 18).attr('dy', '0.32em').text((p) => p.name);
+  lg.append('text').attr('class', 'ax-val').attr('x', W - lx - 4).attr('text-anchor', 'end').attr('dy', '0.32em').text((p) => AX.share(p.share));
+});
+
+// Bubble scatter: MoM vs YoY.
+dash.draw('pv_scatter', (el) => {
+  const got = AX.status(el, ['pv_growth']); if (!got) return;
+  const rows = got[0].slice().sort((a, b) => b.oct26 - a.oct26);
+  const W = el.clientWidth || 420, H = 300;
+  const s = AX.svg(el, W, H);
+  const f = d3.format('+.0%');
+  const y = d3.scaleLinear(d3.extent([0, ...rows.map((r) => r.yoy)]), [H - 34, 18]).nice();
+  const ml = AX.measure(s, y.ticks(5).map(f)) + 10;
+  const x = d3.scaleLinear(d3.extent([0, ...rows.map((r) => r.mom)]), [ml + 10, W - 16]).nice();
+  const r = d3.scaleSqrt([0, d3.max(rows, (d) => d.oct26)], [3, Math.min(26, W / 18)]);
+  s.append('g').selectAll('line').data(y.ticks(5)).join('line').attr('class', 'ax-gridline').attr('x1', ml).attr('x2', W - 8).attr('y1', y).attr('y2', y);
+  s.append('g').selectAll('text').data(y.ticks(5)).join('text').attr('x', ml - 6).attr('y', y).attr('dy', '0.32em').attr('text-anchor', 'end').text(f);
+  const xt = x.ticks(Math.max(2, Math.floor((W - ml) / 70)));
+  s.append('g').selectAll('text').data(xt).join('text').attr('x', x).attr('y', H - 18).attr('text-anchor', 'middle').text(f);
+  s.append('line').attr('class', 'ax-ref').attr('x1', x(0)).attr('x2', x(0)).attr('y1', 10).attr('y2', H - 30);
+  s.append('line').attr('class', 'ax-ref').attr('x1', ml).attr('x2', W - 8).attr('y1', y(0)).attr('y2', y(0));
+  s.append('text').attr('x', W - 8).attr('y', H - 2).attr('text-anchor', 'end').text('vs Sep 2026 →');
+  s.append('text').attr('x', ml).attr('y', 8).text('↑ vs Oct 2025');
+  const g = s.append('g').selectAll('g').data(rows).join('g').attr('transform', (d) => `translate(${x(d.mom)},${y(d.yoy)})`);
+  g.append('circle').attr('r', (d) => r(d.oct26)).style('fill', AX.color(0)).style('fill-opacity', 0.35).style('stroke', AX.color(0)).style('stroke-width', 1.5)
+    .on('mousemove', (ev, d) => AX.show(el, ev, d.maker, [[null, 'Oct 2026', AX.num(d.oct26)], [null, 'vs Sep 2026', AX.pct(d.mom)], [null, 'vs Oct 2025', AX.pct(d.yoy)]]))
+    .on('mouseleave', () => AX.hide(el));
+  g.filter((d, i) => i < 6).append('text').attr('class', 'ax-lab').attr('x', (d) => r(d.oct26) + 4).attr('dy', '0.32em')
+    .attr('text-anchor', 'start').style('pointer-events', 'none').text((d) => d.maker.replace(' Suzuki', '').replace(' Motors', ''))
+    .each(function (d) {
+      // Place right, else left; hide when it would collide with an earlier label.
+      const t = this, w = t.getComputedTextLength(), cx = x(d.mom), cy = y(d.yoy), rr = r(d.oct26);
+      const placed = (s.node().__ax_boxes = s.node().__ax_boxes || []);
+      const hit = (b) => placed.some((p) => b.x0 < p.x1 && b.x1 > p.x0 && b.y0 < p.y1 && b.y1 > p.y0);
+      const right = { x0: cx + rr + 4, x1: cx + rr + 4 + w, y0: cy - 7, y1: cy + 7 };
+      const left = { x0: cx - rr - 4 - w, x1: cx - rr - 4, y0: cy - 7, y1: cy + 7 };
+      if (right.x1 <= W - 4 && !hit(right)) { placed.push(right); }
+      else if (left.x0 >= 0 && !hit(left)) { placed.push(left); d3.select(t).attr('x', -rr - 4).attr('text-anchor', 'end'); }
+      else d3.select(t).remove();
+    });
+});
+
+// Monthly trend lines with end labels.
+dash.draw('pv_trend', (el) => {
+  const got = AX.status(el, ['pv_trend']); if (!got) return;
+  const rows = got[0].map((r) => ({ ...r, date: new Date(r.month) }));
+  const months = Array.from(new Set(rows.map((r) => +r.date))).sort((a, b) => a - b);
+  const series = d3.groups(rows, (r) => r.maker).map(([name, pts]) => ({ name, pts: pts.sort((a, b) => a.date - b.date) }));
+  series.sort((a, b) => b.pts[b.pts.length - 1].units - a.pts[a.pts.length - 1].units);
+  series.forEach((sr, i) => { sr.c = AX.color(i); });
+  const W = el.clientWidth || 640, H = 300;
+  const s = AX.svg(el, W, H);
+  const y = d3.scaleLinear([0, d3.max(rows, (r) => r.units) * 1.05], [H - 30, 12]).nice();
+  const ml = AX.measure(s, y.ticks(5).map(AX.compact)) + 10;
+  const endTxt = (sr) => `${sr.name.replace(' Suzuki', '').replace(' Motors', '')} ${AX.num(sr.pts[sr.pts.length - 1].units)}`;
+  const mr = AX.measure(s, series.map(endTxt), 'ax-lab') + 16;
+  const x = d3.scalePoint(months, [ml + 10, W - mr]).padding(0.1);
+  const mf = d3.utcFormat('%b %Y');
+  s.append('g').selectAll('line').data(y.ticks(5)).join('line').attr('class', 'ax-gridline').attr('x1', ml).attr('x2', W - mr + 8).attr('y1', y).attr('y2', y);
+  s.append('g').selectAll('text').data(y.ticks(5)).join('text').attr('x', ml - 6).attr('y', y).attr('dy', '0.32em').attr('text-anchor', 'end').text(AX.compact);
+  s.append('g').selectAll('text').data(months).join('text').attr('x', (m) => x(m)).attr('y', H - 8).attr('text-anchor', 'middle').text((m) => (W < 480 ? d3.utcFormat('%b')(new Date(m)) : mf(new Date(m))));
+  const line = d3.line().x((p) => x(+p.date)).y((p) => y(p.units));
+  const rule = s.append('line').attr('class', 'ax-ref').attr('y1', 10).attr('y2', H - 30).style('opacity', 0);
+  series.forEach((sr) => {
+    s.append('path').attr('d', line(sr.pts)).style('fill', 'none').style('stroke', sr.c).style('stroke-width', 2).style('stroke-linecap', 'round').style('stroke-linejoin', 'round');
+    s.append('g').selectAll('circle').data(sr.pts).join('circle').attr('cx', (p) => x(+p.date)).attr('cy', (p) => y(p.units)).attr('r', 3).style('fill', sr.c);
+  });
+  // End labels, nudged apart.
+  const labs = series.map((sr) => ({ sr, y: y(sr.pts[sr.pts.length - 1].units) })).sort((a, b) => a.y - b.y);
+  for (let i = 1; i < labs.length; i++) if (labs[i].y - labs[i - 1].y < 15) labs[i].y = labs[i - 1].y + 15;
+  s.append('g').selectAll('text').data(labs).join('text').attr('class', 'ax-lab').attr('x', W - mr + 10).attr('y', (l) => l.y).attr('dy', '0.32em')
+    .style('fill', (l) => l.sr.c).text((l) => endTxt(l.sr));
+  s.append('rect').attr('x', ml).attr('width', W - mr - ml + 8).attr('y', 0).attr('height', H - 30).style('fill', 'transparent')
+    .on('mousemove', (ev) => {
+      const [px] = d3.pointer(ev);
+      const m = months.reduce((best, mm) => (Math.abs(x(mm) - px) < Math.abs(x(best) - px) ? mm : best), months[0]);
+      rule.attr('x1', x(m)).attr('x2', x(m)).style('opacity', 1);
+      AX.show(el, ev, mf(new Date(m)), series.map((sr) => {
+        const p = sr.pts.find((q) => +q.date === m);
+        return [sr.c, sr.name, p ? AX.num(p.units) : '—'];
+      }));
+    })
+    .on('mouseleave', () => { rule.style('opacity', 0); AX.hide(el); });
+});
+
+// Two-wheelers: domestic + exports stacked.
+dash.draw('tw_stack', (el) => {
+  const got = AX.status(el, ['tw_oems']); if (!got) return;
+  const rows = got[0].slice().sort((a, b) => (b.oct26 + b.exports) - (a.oct26 + a.exports));
+  AX.hbars(el, rows, {
+    name: (r) => r.brand,
+    fields: ['oct26', 'exports'],
+    tip: (r) => [[AX.color(0), 'Domestic', AX.num(r.oct26)], [AX.color(1), 'Exports', AX.num(r.exports)], [null, 'Export share', AX.share(r.exports / (r.oct26 + r.exports))]]
+  });
+});
+
+// Two-wheelers: growth with YoY / MoM toggle.
+dash.draw('tw_growth', (el) => {
+  const got = AX.status(el, ['tw_growth']); if (!got) return;
+  const k = AXstate.twMode;
+  const rows = got[0].slice().sort((a, b) => b[k] - a[k]);
+  AX.diverge(el, rows, {
+    name: (r) => r.brand, value: (r) => r[k], fmt: AX.pct,
+    tip: (r) => [[null, 'Oct 2026', AX.num(r.oct26)], [null, k === 'yoy' ? 'Oct 2025' : 'Sep 2026', AX.num(k === 'yoy' ? r.oct25 : r.sep26)], [null, 'Change', AX.pct(r[k])]]
+  });
+});
+document.querySelectorAll('.ax-seg button[data-mode]').forEach((b) => {
+  b.addEventListener('click', () => {
+    AXstate.twMode = b.dataset.mode;
+    document.querySelectorAll('.ax-seg button[data-mode]').forEach((o) => o.setAttribute('aria-pressed', String(o === b)));
+    dash.draw('tw_growth');
+  });
+});
+
+// Commercial vehicles and tractors.
+dash.draw('cv_growth', (el) => {
+  const got = AX.status(el, ['cv_farm']); if (!got) return;
+  const rows = got[0].slice().sort((a, b) => b.yoy_pct - a.yoy_pct);
+  AX.diverge(el, rows, {
+    name: (r) => r.company, value: (r) => r.yoy_pct / 100, fmt: AX.pct,
+    tip: (r) => [[null, r.segment, ''], [null, 'Oct 2026 units', AX.num(r.oct26)], [null, 'vs Oct 2025', AX.pct(r.yoy_pct / 100)]]
+  });
+});
+
+// EVs.
+dash.draw('ev_bars', (el) => {
+  const got = AX.status(el, ['ev']); if (!got) return;
+  const rows = got[0].slice().sort((a, b) => b.oct26 - a.oct26);
+  AX.hbars(el, rows, {
+    name: (r) => r.name, fields: ['oct26'],
+    tip: (r) => [[null, r.segment, ''], [null, 'Oct 2026', AX.num(r.oct26)]].concat(r.oct25 ? [[null, 'Oct 2025', AX.num(r.oct25)], [null, 'Change', AX.pct(r.oct26 / r.oct25 - 1)]] : [])
+  });
+});
+
+// Sortable, searchable table.
+dash.draw('pv_table', (tb) => {
+  const d = dash.data('pv_growth');
+  if (d.status !== 'ok' || !Array.isArray(d.data)) { tb.replaceChildren(); return; }
+  const q = AXstate.q.trim().toLowerCase();
+  const { key, dir } = AXstate.sort;
+  const rows = d.data.filter((r) => !q || (r.maker + ' ' + r.basis).toLowerCase().includes(q))
+    .sort((a, b) => (typeof a[key] === 'string' ? dir * a[key].localeCompare(b[key]) : dir * (a[key] - b[key])));
+  tb.replaceChildren(...rows.map((r) => {
+    const tr = document.createElement('tr');
+    [[r.maker, ''], [r.basis, 'ax-hide-sm'], [AX.num(r.oct26), 'n'], [AX.num(r.sep26), 'n ax-hide-sm'], [AX.num(r.oct25), 'n ax-hide-sm'],
+     [AX.pct(r.mom), 'n ' + (r.mom >= 0 ? 'ax-up' : 'ax-down')], [AX.pct(r.yoy), 'n ' + (r.yoy >= 0 ? 'ax-up' : 'ax-down')], [AX.share(r.share), 'n']]
+      .forEach(([t, c]) => { const td = document.createElement('td'); td.textContent = t; if (c) td.className = c; tr.appendChild(td); });
+    return tr;
+  }));
+});
+const axSyncSort = () => {
+  document.querySelectorAll('.ax-table th').forEach((th) => {
+    const b = th.querySelector('button[data-key]');
+    th.setAttribute('aria-sort', b && b.dataset.key === AXstate.sort.key ? (AXstate.sort.dir > 0 ? 'ascending' : 'descending') : 'none');
+  });
+};
+axSyncSort();
+document.querySelectorAll('.ax-table th button[data-key]').forEach((b) => {
+  b.addEventListener('click', () => {
+    const k = b.dataset.key;
+    AXstate.sort = AXstate.sort.key === k ? { key: k, dir: -AXstate.sort.dir } : { key: k, dir: k === 'maker' || k === 'basis' ? 1 : -1 };
+    axSyncSort();
+    dash.draw('pv_table');
+  });
+});
+document.querySelectorAll('.ax-search').forEach((inp) => {
+  inp.addEventListener('input', () => { AXstate.q = inp.value; dash.draw('pv_table'); });
+});
+</script>
+
+<footer class="ax-foot">
+  <b>Sources</b> (published 1–4 November 2026):
+  <a href="https://www.autocarindia.com/car-news/october-2026-car-sales-tata-retains-second-place-441189">Autocar India – October 2026 car sales</a> ·
+  <a href="https://www.autocarindia.com/industry/hero-sells-over-7-lakh-units-to-top-october-2026-bike-and-scooter-sales-441196">Autocar India – October 2026 two-wheeler sales</a> ·
+  <a href="https://www.autocarindia.com/industry/august-2026-car-sales-tata-widens-monthly-lead-over-mahindra-440627">Autocar India – August 2026 car sales</a> ·
+  <a href="https://www.autocarindia.com/industry-amp/indian-e-two-wheeler-sales-crosses-a-record-223-lakh-units-in-october-441190">Autocar India – e-2W sales October</a> ·
+  <a href="https://thebikejunction.com/news/tvs-two-wheeler-october-2026-sales">BikeJunction – TVS October 2026</a> ·
+  <a href="https://newsable.asianetnews.com/business/commercial-vehicle-sales-surge-for-tata-motors-and-vecv-in-october-articleshow-8fgsgpb">Asianet – Tata Motors & VECV CV sales</a> ·
+  <a href="https://www.investywise.com/ashok-leyland-october-2026-sales-figures-released/">Investywise – Ashok Leyland</a> ·
+  <a href="https://www.cmv360.com/news/with%20Tata%20Motors">CMV360 – CV & tractor roundup</a>.
+  Figures are company-reported; totals are sums of the makers shown, not official SIAM totals.
+</footer>
+</div>
+<script>
+(() => {
+  dash._all();
+  let w = window.innerWidth, t;
+  window.addEventListener('resize', () => { if (window.innerWidth === w) return; w = window.innerWidth; clearTimeout(t); t = setTimeout(() => dash._all(), 150); });
+})();
+</script>
+</body>
+</html>
